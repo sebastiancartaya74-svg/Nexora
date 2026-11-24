@@ -1,0 +1,13 @@
+
+{
+  "name": "NEXORA",
+  "short_name": "NEXORA",
+  "description": "Tu espacio personal de organización y productividad",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d1724",
+  "theme_color": "#0d1724",
+  "icons": []
+}
