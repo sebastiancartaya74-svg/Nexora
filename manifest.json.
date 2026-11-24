@@ -9,5 +9,12 @@
   "orientation": "portrait",
   "background_color": "#0d1724",
   "theme_color": "#0d1724",
-  "icons": []
+  "icons": [
+    {
+      "src": "./nexora-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
 }
