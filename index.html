@@ -1,0 +1,1031 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0d1724">
+<title>NEXORA</title>
+
+<style>
+:root{
+  --bg:#0d1724;
+  --panel:#152437;
+  --accent:#72d8c2;
+  --purple:#a895ff;
+  --text:#f2f6fb;
+  --muted:#9aacc0;
+  --line:#293d53;
+  --red:#ff7777;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,sans-serif;
+}
+header{
+  padding:22px 18px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.logo{
+  font-size:23px;
+  font-weight:800;
+  letter-spacing:3px;
+  color:var(--accent);
+}
+.subtitle{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:5px;
+}
+main{
+  width:100%;
+  max-width:850px;
+  margin:auto;
+  padding:18px;
+}
+nav{
+  display:flex;
+  gap:8px;
+  margin-bottom:20px;
+}
+nav button{
+  flex:1;
+  padding:12px 5px;
+  border:1px solid var(--line);
+  background:var(--panel);
+  color:var(--muted);
+  border-radius:10px;
+  font-size:13px;
+}
+nav button.active{
+  color:var(--accent);
+  border-color:var(--accent);
+  background:#1a3441;
+}
+.section{display:none}
+.section.active{display:block}
+h2{font-size:21px;margin:5px 0 16px}
+h3{font-size:16px;margin:0 0 14px}
+.panel{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:16px;
+  margin-bottom:16px;
+}
+input{
+  width:100%;
+  padding:12px;
+  border-radius:9px;
+  border:1px solid var(--line);
+  background:var(--bg);
+  color:var(--text);
+  font-size:14px;
+  margin-bottom:9px;
+}
+input:focus{
+  outline:1px solid var(--accent);
+}
+button{
+  cursor:pointer;
+  font-family:inherit;
+}
+.primary{
+  width:100%;
+  padding:12px;
+  border:0;
+  border-radius:9px;
+  background:var(--accent);
+  color:#10232b;
+  font-weight:bold;
+}
+.task,.goal{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 0;
+  border-bottom:1px solid var(--line);
+}
+.task:last-child,.goal:last-child{border-bottom:0}
+.task input[type=checkbox],.goal input[type=checkbox]{
+  width:18px;
+  height:18px;
+  margin:0;
+  accent-color:var(--accent);
+  flex-shrink:0;
+}
+.item-info{flex:1;min-width:0}
+.item-name{
+  overflow-wrap:anywhere;
+  font-size:14px;
+}
+.item-date{
+  color:var(--muted);
+  font-size:11px;
+  margin-top:5px;
+}
+.completed .item-name{
+  text-decoration:line-through;
+  color:var(--muted);
+}
+.small-btn{
+  border:1px solid var(--line);
+  background:#1b2d42;
+  color:var(--text);
+  padding:7px 9px;
+  border-radius:7px;
+  font-size:12px;
+}
+.delete{color:var(--red)}
+.edit{color:var(--purple)}
+.empty{
+  color:var(--muted);
+  text-align:center;
+  padding:18px 5px;
+  font-size:13px;
+}
+
+/* CALENDARIO */
+.calendar-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+}
+.calendar-head button{
+  background:#20364c;
+  color:var(--accent);
+  border:1px solid var(--line);
+  padding:8px 13px;
+  border-radius:8px;
+}
+#monthLabel{
+  font-weight:bold;
+  text-align:center;
+}
+.calendar-grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:5px;
+}
+.weekday{
+  text-align:center;
+  color:var(--muted);
+  font-size:11px;
+  padding:7px 0;
+}
+.day{
+  min-height:42px;
+  border:1px solid transparent;
+  background:#1b2d42;
+  color:var(--text);
+  border-radius:8px;
+  position:relative;
+}
+.day.selected{border-color:var(--accent)}
+.day.today{outline:1px solid var(--purple)}
+.day.has-task:after{
+  content:"";
+  position:absolute;
+  bottom:5px;
+  left:50%;
+  transform:translateX(-50%);
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:var(--accent);
+}
+.day:disabled{
+  opacity:.18;
+  cursor:default;
+}
+.selected-title{
+  color:var(--accent);
+  font-size:13px;
+  margin:15px 0 5px;
+}
+
+/* OBJETIVOS */
+.goal-progress{
+  height:9px;
+  background:#263b50;
+  border-radius:20px;
+  overflow:hidden;
+  margin:12px 0 8px;
+}
+.goal-progress-fill{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,var(--accent),var(--purple));
+  transition:width .25s;
+}
+.progress-label{
+  color:var(--muted);
+  font-size:12px;
+}
+
+/* ESTADÍSTICAS */
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  margin-bottom:16px;
+}
+.stat-card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:15px;
+}
+.stat-number{
+  font-size:25px;
+  font-weight:bold;
+  color:var(--accent);
+}
+.stat-label{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:5px;
+}
+.general-bar{
+  height:11px;
+  border-radius:20px;
+  background:#263b50;
+  overflow:hidden;
+  margin:12px 0 7px;
+}
+.general-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--accent),var(--purple));
+  width:0%;
+}
+.chart{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-around;
+  gap:8px;
+  height:145px;
+  padding-top:12px;
+}
+.chart-column{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-end;
+  height:100%;
+  min-width:0;
+}
+.chart-value{
+  font-size:11px;
+  color:var(--text);
+  margin-bottom:5px;
+}
+.chart-bar{
+  width:75%;
+  min-height:3px;
+  background:linear-gradient(180deg,var(--accent),#438c91);
+  border-radius:6px 6px 2px 2px;
+}
+.chart-label{
+  color:var(--muted);
+  font-size:10px;
+  margin-top:7px;
+}
+.history-item{
+  padding:10px 0;
+  border-bottom:1px solid var(--line);
+  font-size:13px;
+}
+.history-item:last-child{border:0}
+.history-date{
+  color:var(--muted);
+  font-size:11px;
+  margin-top:5px;
+}
+.note{
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.5;
+  margin-top:10px;
+}
+@media(min-width:600px){
+  main{padding:25px}
+  .stats-grid{grid-template-columns:repeat(4,1fr)}
+  .day{min-height:55px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div>
+    <div class="logo">NEXORA</div>
+    <div class="subtitle">Tu espacio. Tu progreso.</div>
+  </div>
+  <div style="color:var(--purple);font-size:12px">VERSION 2.3</div>
+</header>
+
+<main>
+
+<nav>
+  <button class="active" data-tab="tasks">Tareas</button>
+  <button data-tab="goals">Objetivos</button>
+  <button data-tab="stats">Estadísticas</button>
+</nav>
+
+<!-- TAREAS -->
+<section id="tasks" class="section active">
+  <h2>Mis tareas</h2>
+
+  <div class="panel">
+    <h3>Nueva tarea</h3>
+    <input id="taskName" type="text" placeholder="¿Qué necesitas hacer?">
+    <input id="taskDate" type="date">
+    <button class="primary" id="addTaskBtn">Agregar tarea</button>
+  </div>
+
+  <div class="panel">
+    <h3>Calendario</h3>
+    <div class="calendar-head">
+      <button id="prevMonth">‹</button>
+      <div id="monthLabel"></div>
+      <button id="nextMonth">›</button>
+    </div>
+    <div class="calendar-grid" id="calendar"></div>
+    <div class="selected-title" id="selectedLabel"></div>
+    <div id="selectedTasks"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Todas las tareas</h3>
+    <div id="taskList"></div>
+  </div>
+</section>
+
+<!-- OBJETIVOS -->
+<section id="goals" class="section">
+  <h2>Mis objetivos</h2>
+
+  <div class="panel">
+    <h3>Nuevo objetivo</h3>
+    <input id="goalName" type="text" placeholder="Escribe tu objetivo">
+    <button class="primary" id="addGoalBtn">Crear objetivo</button>
+  </div>
+
+  <div class="panel">
+    <h3>Progreso general</h3>
+    <div class="goal-progress">
+      <div class="goal-progress-fill" id="goalProgressFill"></div>
+    </div>
+    <div class="progress-label" id="goalProgressLabel">0% completado</div>
+  </div>
+
+  <div class="panel">
+    <h3>Lista de objetivos</h3>
+    <div id="goalList"></div>
+  </div>
+</section>
+
+<!-- ESTADÍSTICAS -->
+<section id="stats" class="section">
+  <h2>Estadísticas</h2>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number" id="totalTasks">0</div>
+      <div class="stat-label">Total de tareas</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="doneTasks">0</div>
+      <div class="stat-label">Completadas</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="pendingTasks">0</div>
+      <div class="stat-label">Pendientes</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="productivity">0%</div>
+      <div class="stat-label">Productividad general</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Progreso general</h3>
+    <div class="general-bar">
+      <div class="general-fill" id="generalFill"></div>
+    </div>
+    <div class="progress-label" id="generalLabel">0 de 0 tareas completadas</div>
+  </div>
+
+  <div class="panel">
+    <h3>Esta semana</h3>
+    <div class="progress-label">Tareas completadas por día</div>
+    <div class="chart" id="weeklyChart"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Este mes</h3>
+    <div class="progress-label">Tareas completadas por semana</div>
+    <div class="chart" id="monthlyChart"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Historial de tareas</h3>
+    <div id="historyList"></div>
+    <div class="note">
+      El historial registra las tareas completadas desde esta versión.
+      Las tareas antiguas sin fecha de finalización no se incluyen en este registro.
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+/* DATOS Y ALMACENAMIENTO */
+
+function readStorage(key, fallback){
+  try{
+    const value = JSON.parse(localStorage.getItem(key));
+    return Array.isArray(value) ? value : fallback;
+  }catch(error){
+    return fallback;
+  }
+}
+
+let tasks = readStorage("nx_tasks", []);
+let goals = readStorage("nx_goals", []);
+
+tasks = tasks.map(task => ({
+  ...task,
+  id: task.id || Date.now() + Math.random(),
+  name: String(task.name || ""),
+  date: task.date || "",
+  done: Boolean(task.done),
+  completedAt: task.completedAt || null
+}));
+
+goals = goals.map(goal => {
+  if(typeof goal === "string"){
+    return {
+      id: Date.now() + Math.random(),
+      name: goal,
+      done: false
+    };
+  }
+
+  return {
+    id: goal.id || Date.now() + Math.random(),
+    name: String(goal.name || ""),
+    done: Boolean(goal.done)
+  };
+});
+
+function save(){
+  localStorage.setItem("nx_tasks", JSON.stringify(tasks));
+  localStorage.setItem("nx_goals", JSON.stringify(goals));
+}
+
+/* FECHAS */
+
+function localDate(date = new Date()){
+  const year = date.getFullYear();
+  const month = String(date.getMonth()+1).padStart(2,"0");
+  const day = String(date.getDate()).padStart(2,"0");
+  return `${year}-${month}-${day}`;
+}
+
+function parseDate(value){
+  const parts = value.split("-").map(Number);
+  return new Date(parts[0],parts[1]-1,parts[2]);
+}
+
+function formatDate(value){
+  if(!value) return "Sin fecha";
+  return parseDate(value).toLocaleDateString("es-ES",{
+    day:"numeric",month:"short",year:"numeric"
+  });
+}
+
+function validDate(value){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = parseDate(value);
+  return localDate(date) === value;
+}
+
+/* NAVEGACIÓN */
+
+document.querySelectorAll("nav button").forEach(button=>{
+  button.addEventListener("click",()=>{
+    document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+
+    button.classList.add("active");
+    document.getElementById(button.dataset.tab).classList.add("active");
+
+    if(button.dataset.tab === "stats") renderStats();
+  });
+});
+
+/* TAREAS */
+
+const taskName = document.getElementById("taskName");
+const taskDate = document.getElementById("taskDate");
+
+taskDate.value = localDate();
+
+let selectedDate = localDate();
+let calendarMonth = new Date();
+calendarMonth.setDate(1);
+
+document.getElementById("addTaskBtn").addEventListener("click",addTask);
+
+taskName.addEventListener("keydown",event=>{
+  if(event.key === "Enter") addTask();
+});
+
+function addTask(){
+  const name = taskName.value.trim();
+  const date = taskDate.value;
+
+  if(!name){
+    alert("Escribe el nombre de la tarea.");
+    return;
+  }
+
+  if(!validDate(date)){
+    alert("Selecciona una fecha válida.");
+    return;
+  }
+
+  tasks.push({
+    id:Date.now()+Math.random(),
+    name,
+    date,
+    done:false,
+    completedAt:null
+  });
+
+  selectedDate = date;
+  calendarMonth = parseDate(date);
+  calendarMonth.setDate(1);
+
+  taskName.value = "";
+  taskDate.value = date;
+
+  save();
+  render();
+}
+
+function toggleTask(id){
+  const task = tasks.find(t=>t.id === id);
+  if(!task) return;
+
+  task.done = !task.done;
+  task.completedAt = task.done ? new Date().toISOString() : null;
+
+  save();
+  render();
+}
+
+function editTask(id){
+  const task = tasks.find(t=>t.id === id);
+  if(!task) return;
+
+  const newName = prompt("Editar nombre de la tarea:",task.name);
+  if(newName === null) return;
+
+  if(!newName.trim()){
+    alert("El nombre no puede estar vacío.");
+    return;
+  }
+
+  const newDate = prompt("Nueva fecha (AAAA-MM-DD):",task.date);
+  if(newDate === null) return;
+
+  if(!validDate(newDate)){
+    alert("La fecha no es válida.");
+    return;
+  }
+
+  task.name = newName.trim();
+  task.date = newDate;
+
+  selectedDate = newDate;
+  calendarMonth = parseDate(newDate);
+  calendarMonth.setDate(1);
+  taskDate.value = newDate;
+
+  save();
+  render();
+}
+
+function deleteTask(id){
+  if(!confirm("¿Quieres eliminar esta tarea?")) return;
+
+  tasks = tasks.filter(t=>t.id !== id);
+  save();
+  render();
+}
+
+function createTaskRow(task){
+  const row = document.createElement("div");
+  row.className = "task" + (task.done ? " completed" : "");
+
+  const check = document.createElement("input");
+  check.type = "checkbox";
+  check.checked = task.done;
+  check.addEventListener("change",()=>toggleTask(task.id));
+
+  const info = document.createElement("div");
+  info.className = "item-info";
+
+  const name = document.createElement("div");
+  name.className = "item-name";
+  name.textContent = task.name;
+
+  const date = document.createElement("div");
+  date.className = "item-date";
+  date.textContent = formatDate(task.date);
+
+  info.append(name,date);
+
+  const edit = document.createElement("button");
+  edit.className = "small-btn edit";
+  edit.textContent = "✎";
+  edit.setAttribute("aria-label","Editar tarea");
+  edit.addEventListener("click",()=>editTask(task.id));
+
+  const del = document.createElement("button");
+  del.className = "small-btn delete";
+  del.textContent = "×";
+  del.setAttribute("aria-label","Eliminar tarea");
+  del.addEventListener("click",()=>deleteTask(task.id));
+
+  row.append(check,info,edit,del);
+  return row;
+}
+
+function renderTaskList(){
+  const list = document.getElementById("taskList");
+  list.innerHTML = "";
+
+  if(tasks.length === 0){
+    list.innerHTML = '<div class="empty">Todavía no tienes tareas.</div>';
+    return;
+  }
+
+  [...tasks]
+    .sort((a,b)=>(a.date||"").localeCompare(b.date||""))
+    .forEach(task=>list.appendChild(createTaskRow(task)));
+}
+
+function renderSelectedDay(){
+  const container = document.getElementById("selectedTasks");
+  const label = document.getElementById("selectedLabel");
+
+  label.textContent = "Tareas del " + formatDate(selectedDate);
+  container.innerHTML = "";
+
+  const dayTasks = tasks.filter(t=>t.date === selectedDate);
+
+  if(dayTasks.length === 0){
+    container.innerHTML = '<div class="empty">No hay tareas para este día.</div>';
+    return;
+  }
+
+  dayTasks.forEach(task=>container.appendChild(createTaskRow(task)));
+}
+
+/* CALENDARIO */
+
+const monthNames = [
+  "Enero","Febrero","Marzo","Abril","Mayo","Junio",
+  "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+];
+
+document.getElementById("prevMonth").addEventListener("click",()=>{
+  calendarMonth.setMonth(calendarMonth.getMonth()-1);
+  renderCalendar();
+});
+
+document.getElementById("nextMonth").addEventListener("click",()=>{
+  calendarMonth.setMonth(calendarMonth.getMonth()+1);
+  renderCalendar();
+});
+
+function renderCalendar(){
+  const calendar = document.getElementById("calendar");
+  calendar.innerHTML = "";
+
+  const year = calendarMonth.getFullYear();
+  const month = calendarMonth.getMonth();
+
+  document.getElementById("monthLabel").textContent =
+    monthNames[month] + " " + year;
+
+  ["L","M","X","J","V","S","D"].forEach(day=>{
+    const element = document.createElement("div");
+    element.className = "weekday";
+    element.textContent = day;
+    calendar.appendChild(element);
+  });
+
+  const firstDay = new Date(year,month,1);
+  const offset = (firstDay.getDay()+6)%7;
+  const daysInMonth = new Date(year,month+1,0).getDate();
+
+  for(let i=0;i<offset;i++){
+    const blank = document.createElement("div");
+    calendar.appendChild(blank);
+  }
+
+  for(let day=1;day<=daysInMonth;day++){
+    const date = new Date(year,month,day);
+    const dateString = localDate(date);
+
+    const button = document.createElement("button");
+    button.className = "day";
+    button.textContent = day;
+
+    if(dateString === localDate()) button.classList.add("today");
+    if(dateString === selectedDate) button.classList.add("selected");
+    if(tasks.some(t=>t.date===dateString)) button.classList.add("has-task");
+
+    button.addEventListener("click",()=>{
+      selectedDate = dateString;
+      taskDate.value = dateString;
+      renderCalendar();
+      renderSelectedDay();
+    });
+
+    calendar.appendChild(button);
+  }
+}
+
+/* OBJETIVOS */
+
+document.getElementById("addGoalBtn").addEventListener("click",addGoal);
+
+document.getElementById("goalName").addEventListener("keydown",event=>{
+  if(event.key === "Enter") addGoal();
+});
+
+function addGoal(){
+  const input = document.getElementById("goalName");
+  const name = input.value.trim();
+
+  if(!name){
+    alert("Escribe el nombre del objetivo.");
+    return;
+  }
+
+  goals.push({
+    id:Date.now()+Math.random(),
+    name,
+    done:false
+  });
+
+  input.value = "";
+  save();
+  renderGoals();
+}
+
+function toggleGoal(id){
+  const goal = goals.find(g=>g.id===id);
+  if(!goal) return;
+
+  goal.done = !goal.done;
+  save();
+  renderGoals();
+}
+
+function editGoal(id){
+  const goal = goals.find(g=>g.id===id);
+  if(!goal) return;
+
+  const name = prompt("Editar objetivo:",goal.name);
+  if(name === null) return;
+
+  if(!name.trim()){
+    alert("El nombre no puede estar vacío.");
+    return;
+  }
+
+  goal.name = name.trim();
+  save();
+  renderGoals();
+}
+
+function deleteGoal(id){
+  if(!confirm("¿Eliminar este objetivo?")) return;
+
+  goals = goals.filter(g=>g.id!==id);
+  save();
+  renderGoals();
+}
+
+function renderGoals(){
+  const list = document.getElementById("goalList");
+  list.innerHTML = "";
+
+  if(goals.length===0){
+    list.innerHTML = '<div class="empty">Todavía no tienes objetivos.</div>';
+  }
+
+  goals.forEach(goal=>{
+    const row = document.createElement("div");
+    row.className = "goal" + (goal.done ? " completed" : "");
+
+    const check = document.createElement("input");
+    check.type = "checkbox";
+    check.checked = goal.done;
+    check.addEventListener("change",()=>toggleGoal(goal.id));
+
+    const info = document.createElement("div");
+    info.className = "item-info";
+
+    const name = document.createElement("div");
+    name.className = "item-name";
+    name.textContent = goal.name;
+    info.appendChild(name);
+
+    const edit = document.createElement("button");
+    edit.className = "small-btn edit";
+    edit.textContent = "✎";
+    edit.addEventListener("click",()=>editGoal(goal.id));
+
+    const del = document.createElement("button");
+    del.className = "small-btn delete";
+    del.textContent = "×";
+    del.addEventListener("click",()=>deleteGoal(goal.id));
+
+    row.append(check,info,edit,del);
+    list.appendChild(row);
+  });
+
+  const completed = goals.filter(g=>g.done).length;
+  const percent = goals.length ? Math.round(completed/goals.length*100) : 0;
+
+  document.getElementById("goalProgressFill").style.width = percent+"%";
+  document.getElementById("goalProgressLabel").textContent =
+    `${completed} de ${goals.length} objetivos completados · ${percent}%`;
+}
+
+/* ESTADÍSTICAS */
+
+function getWeekStart(date){
+  const result = new Date(date);
+  result.setHours(0,0,0,0);
+  result.setDate(result.getDate()-(result.getDay()+6)%7);
+  return result;
+}
+
+function completedOn(dateString){
+  return tasks.filter(task=>{
+    if(!task.done || !task.completedAt) return false;
+
+    const date = new Date(task.completedAt);
+    return !isNaN(date.getTime()) && localDate(date) === dateString;
+  }).length;
+}
+
+function renderChart(elementId,labels,values){
+  const container = document.getElementById(elementId);
+  container.innerHTML = "";
+
+  const max = Math.max(1,...values);
+
+  labels.forEach((label,index)=>{
+    const column = document.createElement("div");
+    column.className = "chart-column";
+
+    const value = document.createElement("div");
+    value.className = "chart-value";
+    value.textContent = values[index];
+
+    const bar = document.createElement("div");
+    bar.className = "chart-bar";
+    bar.style.height = Math.max(3,values[index]/max*85)+"px";
+
+    const text = document.createElement("div");
+    text.className = "chart-label";
+    text.textContent = label;
+
+    column.append(value,bar,text);
+    container.appendChild(column);
+  });
+}
+
+function renderStats(){
+  const total = tasks.length;
+  const done = tasks.filter(t=>t.done).length;
+  const pending = total-done;
+  const percent = total ? Math.round(done/total*100) : 0;
+
+  document.getElementById("totalTasks").textContent = total;
+  document.getElementById("doneTasks").textContent = done;
+  document.getElementById("pendingTasks").textContent = pending;
+  document.getElementById("productivity").textContent = percent+"%";
+
+  document.getElementById("generalFill").style.width = percent+"%";
+  document.getElementById("generalLabel").textContent =
+    `${done} de ${total} tareas completadas`;
+
+  /* GRÁFICA SEMANAL */
+  const today = new Date();
+  const monday = getWeekStart(today);
+  const labels = ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
+  const weeklyValues = [];
+
+  for(let i=0;i<7;i++){
+    const date = new Date(monday);
+    date.setDate(monday.getDate()+i);
+    weeklyValues.push(completedOn(localDate(date)));
+  }
+
+  renderChart("weeklyChart",labels,weeklyValues);
+
+  /* GRÁFICA MENSUAL: CUATRO O CINCO SEMANAS */
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  const days = new Date(year,month+1,0).getDate();
+  const weeks = Math.ceil(days/7);
+  const monthlyValues = [];
+
+  for(let week=0;week<weeks;week++){
+    let count = 0;
+    const start = week*7+1;
+    const end = Math.min(start+6,days);
+
+    for(let day=start;day<=end;day++){
+      const date = localDate(new Date(year,month,day));
+      count += completedOn(date);
+    }
+
+    monthlyValues.push(count);
+  }
+
+  renderChart(
+    "monthlyChart",
+    monthlyValues.map((_,i)=>"Sem. "+(i+1)),
+    monthlyValues
+  );
+
+  /* HISTORIAL */
+  const history = document.getElementById("historyList");
+  history.innerHTML = "";
+
+  const completedTasks = tasks
+    .filter(t=>t.done && t.completedAt && !isNaN(new Date(t.completedAt).getTime()))
+    .sort((a,b)=>new Date(b.completedAt)-new Date(a.completedAt))
+    .slice(0,15);
+
+  if(completedTasks.length===0){
+    history.innerHTML = '<div class="empty">Todavía no hay tareas registradas en el historial.</div>';
+  }else{
+    completedTasks.forEach(task=>{
+      const item = document.createElement("div");
+      item.className = "history-item";
+
+      const name = document.createElement("div");
+      name.textContent = "✓ " + task.name;
+
+      const date = document.createElement("div");
+      date.className = "history-date";
+      date.textContent = "Completada: " +
+        new Date(task.completedAt).toLocaleString("es-ES",{
+          dateStyle:"medium",
+          timeStyle:"short"
+        });
+
+      item.append(name,date);
+      history.appendChild(item);
+    });
+  }
+}
+
+/* ACTUALIZACIÓN GENERAL */
+
+function render(){
+  renderTaskList();
+  renderCalendar();
+  renderSelectedDay();
+  renderGoals();
+  renderStats();
+}
+
+save();
+render();
+
+</script>
+</body>
+</html>
