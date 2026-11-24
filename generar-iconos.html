@@ -1,0 +1,115 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generador de iconos NEXORA</title>
+<style>
+body {
+  background:#0d1724;
+  color:#f2f6fb;
+  font-family:Arial,sans-serif;
+  text-align:center;
+  padding:30px 18px;
+}
+button {
+  display:block;
+  width:100%;
+  padding:17px;
+  margin:15px 0;
+  border:0;
+  border-radius:12px;
+  background:#72d8c2;
+  color:#0d1724;
+  font-weight:bold;
+  font-size:16px;
+}
+p { color:#9aacc0; }
+</style>
+</head>
+<body>
+
+<h1>NEXORA</h1>
+<p>Generador oficial de iconos</p>
+
+<button onclick="generate(192)">
+Generar icono 192 × 192
+</button>
+
+<button onclick="generate(512)">
+Generar icono 512 × 512
+</button>
+
+<p id="status">Listo para generar.</p>
+
+<script>
+async function generate(size) {
+  const status = document.getElementById("status");
+
+  try {
+    status.textContent = "Generando icono...";
+
+    const response = await fetch("./nexora-icon.svg");
+
+    if (!response.ok) {
+      throw new Error("No se encontró el SVG");
+    }
+
+    const svgText = await response.text();
+
+    const svgBlob = new Blob(
+      [svgText],
+      {type:"image/svg+xml"}
+    );
+
+    const svgURL = URL.createObjectURL(svgBlob);
+    const img = new Image();
+
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, size, size);
+
+      canvas.toBlob(blob => {
+        if (!blob) {
+          status.textContent = "No se pudo generar el PNG.";
+          URL.revokeObjectURL(svgURL);
+          return;
+        }
+
+        const pngURL = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.href = pngURL;
+        link.download = `icon-${size}.png`;
+        link.click();
+
+        setTimeout(() => {
+          URL.revokeObjectURL(pngURL);
+          URL.revokeObjectURL(svgURL);
+        }, 2000);
+
+        status.textContent =
+          `Icono ${size} × ${size} generado.`;
+      }, "image/png");
+    };
+
+    img.onerror = () => {
+      status.textContent = "Error al leer el SVG.";
+      URL.revokeObjectURL(svgURL);
+    };
+
+    img.src = svgURL;
+
+  } catch (error) {
+    status.textContent = "Error: " + error.message;
+  }
+}
+</script>
+
+</body>
+</html>
