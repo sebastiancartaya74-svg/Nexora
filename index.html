@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -316,6 +315,70 @@ button{
   line-height:1.5;
   margin-top:10px;
 }
+
+/* RECORDATORIOS */
+.notification-panel{
+  border-color:#355667;
+  background:linear-gradient(145deg,#183345,#152437 72%);
+}
+.notification-heading{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  margin-bottom:12px;
+}
+.notification-mark{
+  width:36px;
+  height:36px;
+  display:grid;
+  place-items:center;
+  flex:0 0 36px;
+  border-radius:11px;
+  background:#244c57;
+  color:var(--accent);
+  font-weight:bold;
+}
+.notification-heading h3{margin:0 0 4px}
+.notification-summary,.reminder-date{
+  color:var(--muted);
+  font-size:12px;
+}
+.reminder-group{margin-top:13px}
+.reminder-group-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:6px;
+  font-size:13px;
+  font-weight:bold;
+}
+.reminder-count{
+  min-width:23px;
+  padding:3px 7px;
+  border-radius:20px;
+  text-align:center;
+  background:#263b50;
+  color:var(--text);
+  font-size:11px;
+}
+.reminder-group.overdue .reminder-count{
+  background:#492b36;
+  color:#ffd6dc;
+}
+.reminder-item{
+  padding:9px 0;
+  border-top:1px solid var(--line);
+}
+.reminder-name{
+  overflow-wrap:anywhere;
+  font-size:13px;
+}
+.reminder-date{margin-top:4px}
+.reminder-clear{
+  padding:12px 0 2px;
+  color:var(--accent);
+  font-size:13px;
+}
 @media(min-width:600px){
   main{padding:25px}
   .stats-grid{grid-template-columns:repeat(4,1fr)}
@@ -331,7 +394,7 @@ button{
     <div class="logo">NEXORA</div>
     <div class="subtitle">Tu espacio. Tu progreso.</div>
   </div>
-  <div style="color:var(--purple);font-size:12px">VERSION 2.3</div>
+  <div style="color:var(--purple);font-size:12px">VERSION 2.4</div>
 </header>
 
 <main>
@@ -352,6 +415,8 @@ button{
     <input id="taskDate" type="date">
     <button class="primary" id="addTaskBtn">Agregar tarea</button>
   </div>
+
+  <div class="panel notification-panel" id="notificationPanel" aria-live="polite"></div>
 
   <div class="panel">
     <h3>Calendario</h3>
@@ -706,6 +771,86 @@ function renderSelectedDay(){
   dayTasks.forEach(task=>container.appendChild(createTaskRow(task)));
 }
 
+/* RECORDATORIOS VISUALES */
+
+function renderNotifications(){
+  const panel = document.getElementById("notificationPanel");
+  const today = localDate();
+  const overdue = tasks
+    .filter(task=>!task.done && task.date && task.date < today)
+    .sort((a,b)=>a.date.localeCompare(b.date));
+  const dueToday = tasks
+    .filter(task=>!task.done && task.date === today);
+
+  panel.innerHTML = "";
+
+  const heading = document.createElement("div");
+  heading.className = "notification-heading";
+
+  const mark = document.createElement("div");
+  mark.className = "notification-mark";
+  mark.textContent = "!";
+  mark.setAttribute("aria-hidden","true");
+
+  const headingText = document.createElement("div");
+  const title = document.createElement("h3");
+  title.textContent = "Recordatorios";
+  const summary = document.createElement("div");
+  summary.className = "notification-summary";
+  const total = overdue.length + dueToday.length;
+  summary.textContent = total
+    ? `${total} tarea${total === 1 ? "" : "s"} pendiente${total === 1 ? "" : "s"} para revisar`
+    : "Avisos de tareas de hoy y atrasadas";
+
+  headingText.append(title,summary);
+  heading.append(mark,headingText);
+  panel.appendChild(heading);
+
+  function addGroup(label,items,isOverdue){
+    if(items.length === 0) return;
+
+    const group = document.createElement("div");
+    group.className = "reminder-group" + (isOverdue ? " overdue" : "");
+
+    const groupTitle = document.createElement("div");
+    groupTitle.className = "reminder-group-title";
+    const labelText = document.createElement("span");
+    labelText.textContent = label;
+    const count = document.createElement("span");
+    count.className = "reminder-count";
+    count.textContent = items.length;
+    groupTitle.append(labelText,count);
+    group.appendChild(groupTitle);
+
+    items.forEach(task=>{
+      const item = document.createElement("div");
+      item.className = "reminder-item";
+      const name = document.createElement("div");
+      name.className = "reminder-name";
+      name.textContent = task.name;
+      const date = document.createElement("div");
+      date.className = "reminder-date";
+      date.textContent = isOverdue
+        ? "Vencida · " + formatDate(task.date)
+        : "Para hoy · " + formatDate(task.date);
+      item.append(name,date);
+      group.appendChild(item);
+    });
+
+    panel.appendChild(group);
+  }
+
+  addGroup("Atrasadas",overdue,true);
+  addGroup("Para hoy",dueToday,false);
+
+  if(total === 0){
+    const clear = document.createElement("div");
+    clear.className = "reminder-clear";
+    clear.textContent = "No tienes tareas vencidas ni pendientes para hoy.";
+    panel.appendChild(clear);
+  }
+}
+
 /* CALENDARIO */
 
 const monthNames = [
@@ -1018,6 +1163,7 @@ function renderStats(){
 
 function render(){
   renderTaskList();
+  renderNotifications();
   renderCalendar();
   renderSelectedDay();
   renderGoals();
